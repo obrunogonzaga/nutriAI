@@ -3,6 +3,7 @@ from langchain.agents import initialize_agent, AgentType
 from dotenv import load_dotenv
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
+from food_image_analyser import FoodImageAnalyserTool
 
 load_dotenv()
 
@@ -40,7 +41,7 @@ class Nutritionist:
 
         self.agent = initialize_agent(
             llm=self.llm,
-            tools=[],
+            tools=[FoodImageAnalyserTool()],
             agent=AgentType.CHAT_CONVERSATIONAL_REACT_DESCRIPTION,
             verbose=True,
             memory=self.memory,
