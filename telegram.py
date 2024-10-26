@@ -7,6 +7,8 @@ from pyrogram.handlers import MessageHandler
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
 from nutritionistAgent import Nutritionist
+from concurrent.futures import ThreadPoolExecutor
+
 
 load_dotenv()
 
@@ -17,15 +19,14 @@ class TelegramBot:
             level=logging.INFO
         )
         self.logger = logging.getLogger(__name__)
-
         self.app = Client(
             "NutriAI",
             api_id=int(os.getenv("TELEGRAM_API_ID")),
             api_hash=os.getenv("TELEGRAM_API_HASH"),
             bot_token=os.getenv("TELEGRAM_TOKEN")
         )
-
         self.setup_handlers()
+        self.executor = ThreadPoolExecutor(max_workers=3)
 
     def setup_handlers(self):
         start_handler = MessageHandler(self.start, filters.command("start") & filters.private)
@@ -52,7 +53,7 @@ class TelegramBot:
         self.agent = Nutritionist(session_id=str(user_id))
 
         try:
-            response = asyncio.get_event_loop().run_in_executor(None, self.agent.run, user_input)
+            response = await asyncio.get_event_loop().run_in_executor(self.executor, self.agent.run, user_input)
         except Exception as error:
             response = f"Ocorreu um erro ao processar sua mensagem: {str(error)}"
             self.logger.error(response, exc_info=True)
@@ -66,17 +67,17 @@ class TelegramBot:
         
         await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
-        storare_path = os.path.join(os.getcwd(), "images")
-        os.makedirs(storare_path, exist_ok=True)
+        storage_path = os.path.join(os.getcwd(), "images")
+        os.makedirs(storage_path, exist_ok=True)
 
         file_name = f"{user_id}_{photo_id}.jpg";
-        photo_path = os.path.join(storare_path, file_name)
+        photo_path = os.path.join(storage_path, file_name)
         await message.download(file_name=photo_path)
 
         self.agent = Nutritionist(session_id=str(user_id))
 
         try:
-            response = asyncio.get_event_loop().run_in_executor(None, self.agent.run, photo_path)
+            response = await asyncio.get_event_loop().run_in_executor(self.executor, self.agent.run, photo_path)
         except Exception as error:
             response = f"Ocorreu um erro ao processar sua imagem: {str(error)}"
             self.logger.error(response, exc_info=True)
