@@ -3,7 +3,7 @@ from langchain.agents import initialize_agent, AgentType
 from dotenv import load_dotenv
 from langchain.memory import ConversationBufferMemory
 from langchain_community.chat_message_histories import ChatMessageHistory
-from food_image_analyser import FoodImageAnalyserTool
+from .food_image_analyser import FoodImageAnalyserTool
 
 load_dotenv()
 

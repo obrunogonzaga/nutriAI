@@ -6,7 +6,7 @@ from pyrogram import Client, filters
 from pyrogram.handlers import MessageHandler
 from pyrogram.types import Message
 from pyrogram.enums import ChatAction
-from nutritionistAgent import Nutritionist
+from .nutritionist_agent import Nutritionist
 from concurrent.futures import ThreadPoolExecutor
 
 
